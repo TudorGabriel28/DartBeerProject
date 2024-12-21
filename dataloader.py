@@ -58,6 +58,7 @@ def get_splits(path="./dataset/labels.pkl", dataset="d1", split="train"):
         return splits[split]
 
 
+@tf.autograph.experimental.do_not_convert
 def preprocess(path, xy, cfg, bbox_to_gt_func, split="train", return_xy=False):
     path = path.numpy().decode("utf-8")
     xy = xy.numpy()
@@ -306,7 +307,7 @@ def load_tfds(
         num_parallel_calls=AUTO,
     )
 
-    input_size = int(img_path.split("/")[-1])
+    input_size = int(img_path.split(os.path.sep)[-1])
 
     if not return_xy:
         if cfg.model.tiny:
