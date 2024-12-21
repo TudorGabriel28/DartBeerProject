@@ -44,7 +44,9 @@ def get_splits(path="./dataset/labels.pkl", dataset="d1", split="train"):
     val_folders, test_folders = datasets[dataset]["val"], datasets[dataset]["test"]
 
     df = pd.read_pickle("./dataset/labels.pkl")
-    df = df[df.img_folder.str.contains(dataset)]
+
+    # FOLDERS NEED TO BE PREFIXED WITH utrecht
+    # df = df[df.img_folder.str.contains(dataset)]
 
     splits = {
         "val": df[np.isin(df.img_folder, val_folders)],
@@ -58,12 +60,13 @@ def get_splits(path="./dataset/labels.pkl", dataset="d1", split="train"):
         return splits[split]
 
 
-@tf.autograph.experimental.do_not_convert
 def preprocess(path, xy, cfg, bbox_to_gt_func, split="train", return_xy=False):
     path = path.numpy().decode("utf-8")
     xy = xy.numpy()
 
     img = cv2.imread(path)
+    if img is None:
+        raise FileNotFoundError(f"Image at path {path} not found.")
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # yolov4 tf convention
     img = img / 255.0  # yolov4 tf convention
 
@@ -296,16 +299,16 @@ def load_tfds(
     ds = tf.data.Dataset.from_tensor_slices((img_paths, xys))
     ds = ds.shuffle(10000).repeat()
 
-    ds = ds.map(
-        lambda path, xy: tf.py_function(
+    def preprocess_fn(path, xy):
+        return tf.py_function(
             lambda path, xy: preprocess(
                 path, xy, cfg, bbox_to_gt_func, split, return_xy
             ),
             [path, xy],
             dtypes,
-        ),
-        num_parallel_calls=AUTO,
-    )
+        )
+
+    ds = ds.map(preprocess_fn, num_parallel_calls=AUTO)
 
     input_size = int(img_path.split(os.path.sep)[-1])
 

@@ -76,18 +76,22 @@ def predict(
     write_dir = osp.join("./models", cfg.model.name, "preds", split)
     if write:
         os.makedirs(write_dir, exist_ok=True)
+    # write_dir = write_dir.replace("\\", "/")
 
     data = get_splits(labels_path, dataset, split)
     img_prefix = osp.join(cfg.data.path, "cropped_images", str(cfg.model.input_size))
     img_paths = [
         osp.join(img_prefix, folder, name)
+        # os.path.join(
+        #     img_prefix, folder, name.replace("/", os.sep).replace("\\", os.sep)
+        # )
         for (folder, name) in zip(data.img_folder, data.img_name)
     ]
 
     xys = np.zeros((len(data), 7, 3))  # third column for visibility
-    data.xy = data.xy.apply(
-        eval
-    )  # Convert string representation of list to actual list
+    # data.xy = data.xy.apply( # ERROR WHEN TESTING TRAINING DATA
+    #     eval
+    # )  # Convert string representation of list to actual list
     data.xy = data.xy.apply(np.array)  # Convert list to numpy array
     for i, _xy in enumerate(data.xy):
         xys[i, : _xy.shape[0], :2] = _xy
