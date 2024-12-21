@@ -46,7 +46,7 @@ def get_splits(path="./dataset/labels.pkl", dataset="d1", split="train"):
     df = pd.read_pickle("./dataset/labels.pkl")
 
     # FOLDERS NEED TO BE PREFIXED WITH utrecht
-    # df = df[df.img_folder.str.contains(dataset)]
+    df = df[df.img_folder.str.contains(dataset)]
 
     splits = {
         "val": df[np.isin(df.img_folder, val_folders)],
