@@ -51,3 +51,35 @@ Dataset 2:\
 - Run "combine_labels"
 - Run "crop_images" with --size=800 and appropriate --labels-path
 
+## Instruction for data annotating
+
+Open conda environment
+
+`cd /dataset`
+
+`python .\annotate.py --img-folder {folder name} --scale {if the image is too small on your screen you can increase its scale, e.g. 1.5 - default is 1}`
+
+Images are already cropped so you need to click once on top left corner of the image and then on bottom right corner.
+
+Calibration points are:
+- first - between 5-20
+- second - between 3-17
+- third - between 8-11
+- fourth - between 6-13
+
+After you set the calibration points once, it will usually be the same spot for all the images so you don't have to annotate them again, BUT
+
+**!!! Be careful to check in every photo if the contact points are set correctly because the dartboard has sligthly different rotation in photos !!!**
+
+After finishing one photo, you press "a" for saving the annotations and moving onto the next photo
+
+All the annotation from previous photo will appear on the next photo (this is normal) and you have to press "z" to undo each point
+
+You usually press z three times in order to remove darts annotations (be careful to also look at the calibration points position)
+
+If it doesn't let you put the third dart label, press "x" to reset all labels from the current photo
+
+If you annotated wrong the previous photo, you can press "," to go back to it
+
+
+
