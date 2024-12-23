@@ -27,8 +27,11 @@ datasets = {
         "val": ["d2_02_03_2021", "d2_02_05_2021"],
         "test": ["d2_03_03_2020", "d2_02_10_2021", "d2_02_03_2021_2"],
     },
-    "utrecht": {"val": ["utrecht_12_22_2024_val"], "test": ["utrecht_12_22_2024_test"]},
-    #     "utrecht": {"val": ["utrecht_01_04_2023"], "test": ["utrecht_01_07_2023_2"]},
+    "utrecht": {
+        "val": ["utrecht_12_22_2024_val", "utrecht_12_23_2024_val"],
+        "test": ["utrecht_12_22_2024_test", "utrecht_12_23_2024_test"],
+    },
+    # "utrecht": {"val": ["utrecht_01_04_2023"], "test": ["utrecht_01_07_2023_2"]},
 }
 
 
