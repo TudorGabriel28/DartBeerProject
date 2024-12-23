@@ -76,17 +76,18 @@ def predict(
     write_dir = osp.join("./models", cfg.model.name, "preds", split)
     if write:
         os.makedirs(write_dir, exist_ok=True)
-    # write_dir = write_dir.replace("\\", "/")
+    write_dir = write_dir.replace("\\", "/")
 
     data = get_splits(labels_path, dataset, split)
     img_prefix = osp.join(cfg.data.path, "cropped_images", str(cfg.model.input_size))
     img_paths = [
-        osp.join(img_prefix, folder, name)
-        # os.path.join(
-        #     img_prefix, folder, name.replace("/", os.sep).replace("\\", os.sep)
-        # )
+        # osp.join(img_prefix, folder, name)
+        os.path.join(
+            img_prefix, folder, name.replace("/", os.sep).replace("\\", os.sep)
+        )
         for (folder, name) in zip(data.img_folder, data.img_name)
     ]
+    print(img_paths)
 
     xys = np.zeros((len(data), 7, 3))  # third column for visibility
     # data.xy = data.xy.apply( # ERROR WHEN TESTING TRAINING DATA
@@ -128,7 +129,9 @@ def predict(
                     circles=False,
                     score=True,
                 )
-                cv2.imwrite(osp.join(write_dir, p.split("/")[-1]), img)
+                cv2.imwrite(
+                    osp.join(write_dir, p.replace("\\", "/").split("/")[-1]), img
+                )
 
     fps = (len(img_paths) - 1) / (time() - ti)
     print("FPS: {:.2f}".format(fps))

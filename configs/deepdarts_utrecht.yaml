@@ -13,8 +13,8 @@ board:
 
 train:
   seed: 0
-  epochs: 10 # original was 50
-  batch_size: 10  # per gpu
+  epochs: 50 # original was 50
+  batch_size: 4  # per gpu
   lr: 0.001
   bbox_size: 0.025  # fraction of input size
   loss_type: 'ciou'
