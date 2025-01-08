@@ -9,6 +9,8 @@ from time import time
 from dataset.annotate import draw, get_dart_scores
 import pickle
 
+import json
+
 
 def bboxes_to_xy(bboxes, max_darts=3):
     xy = np.zeros((4 + max_darts, 3), dtype=np.float32)
@@ -154,10 +156,10 @@ def predict(
 
     results = {
         "img_paths": img_paths,
-        "preds": preds,
-        "gt": xys,
+        "preds": preds.tolist(),
+        "gt": xys.tolist(),
         "fps": fps,
-        "ASE": ASE,
+        "ASE": ASE.tolist(),
         "PCS": PCS,
         "MASE": MASE,
     }
@@ -166,6 +168,11 @@ def predict(
         results, open(osp.join("./models", cfg.model.name, "results.pkl"), "wb")
     )
     print("Saved results.")
+
+    # Save predictions to JSON file
+    with open(osp.join("./models", cfg.model.name, "results.json"), "w") as json_file:
+        json.dump(results, json_file, indent=4)
+    print("Saved results to JSON file.")
 
 
 if __name__ == "__main__":

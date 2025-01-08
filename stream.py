@@ -30,6 +30,8 @@ def predict_stream(yolo):
         preds = bboxes_to_xy(bboxes, 3)
         xy = preds
         xy = xy[xy[:, -1] == 1]
+        # get_dart_scores
+        # output to results.json {"x":12, "y":12, "score":23}
         img = draw(
             cv2.cvtColor(img, cv2.COLOR_RGB2BGR),
             xy[:, :2],
