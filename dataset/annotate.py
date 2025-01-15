@@ -190,8 +190,13 @@ def transform(xy, img=None, angle=9, M=None):
     return xy_dst, img, M
 
 
+def get_unity_coord(xy, cfg):
+    print("xy: ", xy)
+
+
 def get_dart_scores(xy, cfg, numeric=False):
     valid_cal_pts = xy[:4][(xy[:4, 0] > 0) & (xy[:4, 1] > 0)]
+    # print(valid_cal_pts)
     if xy.shape[0] <= 4 or valid_cal_pts.shape[0] < 4:  # missing calibration point
         return []
     xy, _, _ = transform(xy.copy(), angle=0)
@@ -256,6 +261,39 @@ def total_score(scores):
                 total += int(score[1:]) * 3
 
     return total
+
+
+def transform_to_unity(xy, cfg):
+    # Get center and radius of the dartboard in image space
+    c, r_d = get_circle(xy)  # Center and radius in image coordinates
+    print("Center and radius of dartboard in image space: ", c, r_d)
+
+    # Dart contact points
+    dart_points = xy[4:, :2]  # Points after calibration
+    print("Dart contact points in image space: ", dart_points)
+
+    # Translate points to be relative to the dartboard center
+    relative_points = dart_points - c  # Translate to dartboard center
+    print("Dart contact points relative to dartboard center: ", relative_points)
+
+    # Normalize distances by dividing by the radius
+    distances = np.linalg.norm(relative_points, axis=-1) / r_d
+    print("Normalized distances: ", distances)
+
+    # Ensure distances are capped at 1 (points outside the dartboard)
+    distances = np.clip(distances, 0, 1)
+
+    # Calculate angles in radians
+    angles = np.arctan2(
+        -relative_points[:, 1], relative_points[:, 0]
+    )  # Angles from center
+
+    # Convert to Unity coordinates (normalized to unit circle)
+    unity_points = np.zeros_like(dart_points)
+    unity_points[:, 0] = distances * np.cos(angles)  # X coordinate
+    unity_points[:, 1] = distances * np.sin(angles)  # Y coordinate
+
+    return unity_points
 
 
 def draw(img, xy, cfg, circles, score, color=(255, 255, 0)):

@@ -5,14 +5,15 @@ import os
 from dataloader import get_splits
 import cv2
 import numpy as np
-from time import time
+from time import time, sleep
 from dataset.annotate import draw, get_dart_scores
 import pickle
 from predict import bboxes_to_xy
 import datetime
+from plot_dartboard import DartboardTransformer
 
 
-def predict_stream(yolo):
+def predict_stream(yolo, transformer):
 
     cam = cv2.VideoCapture(0)
     print(cam.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -21,20 +22,27 @@ def predict_stream(yolo):
     i = 0
 
     while True:
+
         check, frame = cam.read()
         # Resize frame to 800x800
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        # img = img[50:1000, 400:1000]
+        ######### img = img[50:1000, 400:1000]
         img = cv2.resize(img, (800, 800))
+
         bboxes = yolo.predict(img)
         preds = bboxes_to_xy(bboxes, 3)
         xy = preds
         xy = xy[xy[:, -1] == 1]
-        # get_dart_scores
-        # output to results.json {"x":12, "y":12, "score":23}
+
+        coord = xy[:, :2]
+
+        if len(coord) >= 4:
+            scores = get_dart_scores(coord, cfg)
+            transformer.update_plot(coord, scores)
+
         img = draw(
             cv2.cvtColor(img, cv2.COLOR_RGB2BGR),
-            xy[:, :2],
+            coord,
             cfg,
             circles=False,
             score=True,
@@ -124,6 +132,9 @@ if __name__ == "__main__":
     parser.add_argument("-cd", "--collect-data", default=False)
     args = parser.parse_args()
 
+    transformer = DartboardTransformer()
+    transformer.setup_plot()
+
     if args.collect_data == "True":
         collect_data()
     else:
@@ -136,4 +147,4 @@ if __name__ == "__main__":
             osp.join("models", args.cfg, "weights"), cfg.model.weights_type
         )
 
-        predict_stream(yolo)
+        predict_stream(yolo, transformer)

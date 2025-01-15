@@ -6,7 +6,7 @@ from dataloader import get_splits
 import cv2
 import numpy as np
 from time import time
-from dataset.annotate import draw, get_dart_scores
+from dataset.annotate import draw, get_dart_scores, transform_to_unity, get_unity_coord
 import pickle
 
 import json
@@ -89,7 +89,6 @@ def predict(
         )
         for (folder, name) in zip(data.img_folder, data.img_name)
     ]
-    print(img_paths)
 
     xys = np.zeros((len(data), 7, 3))  # third column for visibility
     # data.xy = data.xy.apply( # ERROR WHEN TESTING TRAINING DATA
@@ -105,12 +104,14 @@ def predict(
     print("Making predictions with {}...".format(cfg.model.name))
 
     for i, p in enumerate(img_paths):
+
         if i == 1:
             ti = time()
         img = cv2.imread(p)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         bboxes = yolo.predict(img)
+
         preds[i] = bboxes_to_xy(bboxes, max_darts)
 
         if write:
@@ -119,11 +120,14 @@ def predict(
             )
             os.makedirs(write_dir, exist_ok=True)
             xy = preds[i]
+
             xy = xy[xy[:, -1] == 1]
+
             error = sum(get_dart_scores(preds[i, :, :2], cfg, numeric=True)) - sum(
                 get_dart_scores(xys[i, :, :2], cfg, numeric=True)
             )
             if not args.fail_cases or (args.fail_cases and error != 0):
+
                 img = draw(
                     cv2.cvtColor(img, cv2.COLOR_RGB2BGR),
                     xy[:, :2],
